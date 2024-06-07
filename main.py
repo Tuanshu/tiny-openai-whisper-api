@@ -62,7 +62,7 @@ def transcribe(audio_path: str, whisper_model: str, **whisper_args):
 
 WHISPER_DEFAULT_SETTINGS = {
 #    "whisper_model": "base",
-    "whisper_model": "large-v2",
+    "whisper_model": "large-v3",
     "temperature": 0.0,
     "temperature_increment_on_fallback": 0.2,
     "no_speech_threshold": 0.6,
@@ -86,7 +86,7 @@ async def transcriptions(model: str = Form(...),
                          temperature: Optional[float] = Form(None),
                          language: Optional[str] = Form(None)):
 
-    assert model == "whisper-1"
+    # assert model == "whisper-1"
     if file is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
