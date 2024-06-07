@@ -7,6 +7,10 @@ services:
     container_name: whisper-api
     restart: unless-stopped
     init: true
+    environment:
+      - HTTP_PROXY=http://IG2074:QMMR8ftb@10.36.6.66:3128
+      - HTTPS_PROXY=http://IG2074:QMMR8ftb@10.36.6.66:3128
+
     volumes:
       - ./main.py:/app/main.py
       - /data/.cache/whisper:/cache/whisper
@@ -18,5 +22,5 @@ services:
           devices:
             - driver: nvidia
               # count: 2
-              device_ids: [ "0", "1" ]
+              device_ids: [ "1" ]
               capabilities: [ gpu ]
