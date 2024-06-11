@@ -32,7 +32,10 @@ app = FastAPI()
 @lru_cache(maxsize=1)
 def get_whisper_model(whisper_model: str):
     """Get a whisper model from the cache or download it if it doesn't exist"""
+
     model = whisper.load_model(whisper_model,download_root="/cache/whisper")
+    # model = whisper.load_model(whisper_model)
+
     return model
 
 def transcribe(audio_path: str, whisper_model: str, **whisper_args):
