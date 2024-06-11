@@ -78,6 +78,11 @@ WHISPER_DEFAULT_SETTINGS = {
 UPLOAD_DIR="/tmp"
 # -----
 
+@app.get('/')
+async def helloworld():
+    return {"content": " Hello World! this is audio-server."}
+
+
 @app.post('/v1/audio/transcriptions')
 async def transcriptions(model: str = Form(...),
                          file: UploadFile = File(...),
@@ -87,6 +92,9 @@ async def transcriptions(model: str = Form(...),
                          language: Optional[str] = Form(None)):
 
     # assert model == "whisper-1"
+    if model:
+        WHISPER_DEFAULT_SETTINGS['whisper_model']=model
+        print(f'set to {model}')
     if file is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
