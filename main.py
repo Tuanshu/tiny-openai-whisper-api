@@ -86,6 +86,12 @@ async def helloworld():
     return {"content": " Hello World! this is audio-server."}
 
 
+@app.post('/v1/audio/transcriptions-file')
+async def transcriptions_file(file: UploadFile = File(...)):
+    return await transcriptions(model='large-v3',file = file)
+
+
+
 @app.post('/v1/audio/transcriptions')
 async def transcriptions(model: str = Form(...),
                          file: UploadFile = File(...),
