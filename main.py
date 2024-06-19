@@ -88,7 +88,7 @@ async def helloworld():
 
 @app.post('/v1/audio/transcriptions-large-v3')
 async def transcriptions_large_v3(file: UploadFile = File(...)):
-    return await transcriptions(model='large-v3',file = file)
+    return await transcriptions(model='large-v3',file = file, response_format='json',temperature=0)
 
 
 
