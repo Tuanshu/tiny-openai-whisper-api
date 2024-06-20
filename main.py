@@ -1,5 +1,4 @@
-from fastapi import FastAPI, Form, UploadFile, File
-from fastapi import HTTPException, status
+from fastapi import FastAPI, Form, UploadFile, File,Request, HTTPException, status
 
 import os
 import shutil
@@ -8,11 +7,25 @@ from pathlib import Path
 from typing import Any, List, Union, Optional
 
 from datetime import timedelta
+from starlette.middleware.base import BaseHTTPMiddleware
 
 import numpy as np
 import whisper
 
-app = FastAPI()
+app = FastAPI(servers=[{"url": "https://cloud-gateway.ces.myfiinet.com/ai-audio"},{"url": "http://10.20.216.230:6614"}])
+
+class CustomOpenAPIMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        base_url = str(request.base_url)
+        if "cloud-gateway.ces.myfiinet.com" in base_url:
+            app.openapi_url = "/ai-audio/openapi.json"
+        else:
+            app.openapi_url = "openapi.json"
+        return response
+
+# Apply the custom middleware
+app.add_middleware(CustomOpenAPIMiddleware)
 
 #url https://api.openai.com/v1/audio/transcriptions \
 #  -H "Authorization: Bearer $OPENAI_API_KEY" \
