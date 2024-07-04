@@ -4,7 +4,7 @@ import os
 import shutil
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, List, Union, Optional
+from typing import Any, List, Union, Optional,Dict,Tuple
 
 from datetime import timedelta
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -166,12 +166,10 @@ async def transcriptions(model: str = Form(...),
     if response_format in ['srt']:
         ret = ""
         for seg in transcript['segments']:
-            
-            td_s = timedelta(milliseconds=seg["start"]*1000)
-            td_e = timedelta(milliseconds=seg["end"]*1000)
+            start_eva, end_eva = evaluate_segment_start_end(seg["words"])
 
-            t_s = f'{td_s.seconds//3600:02}:{(td_s.seconds//60)%60:02}:{td_s.seconds%60:02}.{td_s.microseconds//1000:03}'
-            t_e = f'{td_e.seconds//3600:02}:{(td_e.seconds//60)%60:02}:{td_e.seconds%60:02}.{td_e.microseconds//1000:03}'
+            t_s = format_time(start_eva)
+            t_e = format_time(end_eva)
 
             ret += '{}\n{} --> {}\n{}\n\n'.format(seg["id"], t_s, t_e, seg["text"])
         ret += '\n'
@@ -201,3 +199,39 @@ async def transcriptions(model: str = Form(...),
     
     return {'text': transcript['text']}
 
+
+# new by ts
+def format_time(milliseconds: float) -> str:
+    td = timedelta(milliseconds=milliseconds)
+    return f'{td.seconds // 3600:02}:{(td.seconds // 60) % 60:02}:{td.seconds % 60:02}.{td.microseconds // 1000:03}'
+
+def evaluate_segment_start_end(words: List[Dict[str, float]], k: float = 3) -> Tuple[float, float]:
+    # 计算word time的mean和std
+    word_times = np.array([word['end'] - word['start'] for word in words])
+    mean = np.mean(word_times)
+    std = np.std(word_times)
+    
+    # 标记低信心词
+    low_confidence_words = [word for word in words if (word['end'] - word['start']) > (mean + k * std)]
+
+    # 初始化start和end
+    start = words[0]['start']
+    end = words[-1]['end']
+
+    # 遍历words来确定start和end，同时计算调整
+    start_adjustment = 0
+    end_adjustment = 0
+
+    for i, word in enumerate(words):
+        if word not in low_confidence_words and start == words[0]['start']:
+            start = word['start']
+            start_adjustment = i  # 记录低信心词数量以调整start
+        if word not in low_confidence_words:
+            end = word['end']
+            end_adjustment = len(words) - 1 - i  # 记录低信心词数量以调整end
+
+    # 根据低信心词数量调整start和end
+    start = max(0, start - start_adjustment * mean)  # 防止start为负值
+    end += end_adjustment * mean
+
+    return start * 1000, end * 1000
