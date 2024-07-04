@@ -10,9 +10,9 @@ from datetime import timedelta
 from starlette.middleware.base import BaseHTTPMiddleware
 
 import numpy as np
-import whisper
+import whisper_timestamped as whisper
 
-app = FastAPI(servers=[{"url": "https://cloud-gateway.ces.myfiinet.com/ai-audio"},{"url": "http://10.20.216.230:6614"}])
+app = FastAPI(servers=[{"url": "https://cloud-gateway.ces.myfiinet.com/ai-audio"},{"url": "http://10.20.216.230:6615"}])
 
 class CustomOpenAPIMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -68,9 +68,17 @@ def transcribe(audio_path: str, whisper_model: str, **whisper_args):
 
     del whisper_args["temperature_increment_on_fallback"]
 
-    transcript = transcriber.transcribe(
-        audio_path,
-        **whisper_args,
+    # transcript = transcriber.transcribe(
+    #     audio_path,
+    #     **whisper_args,
+    # )
+
+    # https://github.com/linto-ai/whisper-timestamped
+    audio = whisper.load_audio(audio_path)
+
+    transcript = whisper.transcribe(
+        transcriber,
+        audio,
     )
 
     return transcript
@@ -187,6 +195,9 @@ async def transcriptions(model: str = Form(...),
         if transcript['language'] == 'ja':
             transcript['language'] = 'japanese'
         return transcript
-
+    
+    if response_format in ['raw']:
+        return transcript
+    
     return {'text': transcript['text']}
 
