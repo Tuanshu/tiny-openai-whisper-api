@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import numpy as np
 import whisper_timestamped as whisper
 
-app = FastAPI(servers=[{"url": "https://cloud-gateway.ces.myfiinet.com/ai-audio"},{"url": "http://10.20.216.230:6614"}])
+app = FastAPI(servers=[{"url": "https://cloud-gateway.ces.myfiinet.com/ai-audio"},{"url": "http://10.20.216.230:6610"}])
 
 class CustomOpenAPIMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

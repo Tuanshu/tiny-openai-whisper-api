@@ -1,10 +1,10 @@
 version: "3.9"
-# docker compose -f docker-compose_timestamped.yml up
+# docker compose -f docker-compose_timestamped_dist.yml up
 services:
-  whisper-api-ts:
-    image: msoo.ces.myfiinet.com:6702/morioka/tiny-openai-whisper-api:0.1.2.timestamped
+  whisper-api-ts-exp:
+    image: msoo.ces.myfiinet.com:6702/morioka/tiny-openai-whisper-api:0.1.2.timestamped.dist
     build: .
-    container_name: whisper-api-ts
+    container_name: whisper-api-ts-exp
     restart: unless-stopped
     init: true
     # environment:
@@ -12,10 +12,10 @@ services:
     #   - HTTPS_PROXY=http://IG2074:QMMR8ftb@10.36.6.66:3128
 
     volumes:
-      - ./main_timestamped.py:/app/main.py
+      - ./main_timestamped_dist.py:/app/main.py
       - /data/.cache/whisper:/cache/whisper
     ports:
-      - 6614:8000
+      - 6610:8000
     deploy:
       resources:
         reservations:
